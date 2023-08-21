@@ -1,5 +1,6 @@
 from data_class.file_data import FileData
-from suggest_engine.suggest import find_match, replaced_char, add_char, sub_char
+from suggest_engine.suggest import find_match, replaced_char, add_char, sub_char, add_row_content, \
+    sort_and_filter_first_k
 
 data = FileData('..\\private\\my_files')
 
@@ -30,3 +31,17 @@ def test_sub_char():
     assert not sub_char('my cdode', 2, 'this is my code it is very nice', 2)
     assert not sub_char('my coded', 8, 'this is my code it is very nice', 2)
     assert sub_char('dmy code', 0, 'this is my code it is very nice', 2)
+
+
+def test_add_row_content():
+    assert add_row_content([(0, 2), (0, 5)], data) == [('The functions in this chapter interact with Python '
+                                                        'objects regardless', 0, 2), ('for which they do not'
+                                                                                      ' apply, '
+                                                                                      'they will raise a '
+                                                                                      'Python exception.', 0, 5)]
+
+
+def test_sort_and_filter_first_k():
+    try_list = [('hi', 1, 5), ('go', 2, 17), ('python', 3, 5), ('went', 7, 5), ('apple', 10, 5), ('git', 15, 5)]
+    res_list = [('apple', 10, 5), ('git', 15, 5), ('go', 2, 17), ('hi', 1, 5), ('python', 3, 5)]
+    assert sort_and_filter_first_k(try_list, 5) == res_list
