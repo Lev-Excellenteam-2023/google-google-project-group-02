@@ -1,6 +1,6 @@
 from data_class.file_data import *
 
-files = file_data()
+files = FileData()
 
 
 def test_file_name():
@@ -17,7 +17,7 @@ def test_simple_add_file_data():
     assert files.data_dict[index][1] == ['Introduction to Networking', 'In the early days of computing, there were '
                                                                        'mainframe computers. These computers were '
                                                                        'large and centrally located,', 'usually in a '
-                                                                                                       'very cold ']
+                                                                       'very cold and climate-controlled environment.']
 
 
 def test_add_file_data_with_a_few_new_lines():
