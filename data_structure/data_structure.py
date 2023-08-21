@@ -8,10 +8,9 @@ class WordData:
     file: int
     row: int
     offset: int
-    next_word: str or None
 
     def is_my_neighbors(self, word: WordData) -> bool:
-        if self.file == word.file and self.row == word.row and self.offset == word.offset + 1:
+        if self.file == word.file and self.row == word.row and self.offset + 1 == word.offset:
             return True
         return False
 
@@ -19,13 +18,20 @@ class WordData:
 class WordsGraph:
     graph: dict[str, [WordData]]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.graph = dict()
 
-    def add_word(self, word: str, word_data: WordData):
+    def add_word(self, word: str, word_data: WordData) -> None:
         if word in self.graph:
             self.graph[word] += [word_data]
         else:
             self.graph[word] = [word_data]
+
+    def find_match(self, my_str: List[str]) -> List[(int, int)]:
+        # TODO
+        return []
+
+
+
 
 
