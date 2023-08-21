@@ -7,7 +7,6 @@ from util.remove_punctuation_util import process_sentence
 from data_structure.data_structure import WordData, WordsGraph
 
 
-
 class FileData:
     """
     A class that will save the data lines in a dict - each file will get an index as a key and the value will be a
@@ -27,6 +26,10 @@ class FileData:
         self.load_words_graph()
 
     def add_all_files_from_path(self, path):
+        """
+        Gets the path that contains the file and adds to data_dict the name and content of the file.
+        :param path: The main path
+        """
         for filename in os.listdir(path):
             file_path = os.path.join(path, filename)
             if os.path.isfile(file_path):
@@ -49,6 +52,9 @@ class FileData:
         self.free_index += 1
 
     def load_words_graph(self):
+        """
+        Goes over the data in data_dict and adds the words to words_graph
+        """
         for key in self.data_dict:
             for row_index, row in enumerate(self.data_dict[key][FILE_CONTENT]):
                 clean_words = process_sentence(self.data_dict[key][FILE_CONTENT][row_index])
@@ -67,4 +73,3 @@ class FileData:
             return self.data_dict[file_index][FILE_CONTENT][line_index]
         except KeyError:
             return 'There no such file_index or line_index'
-
