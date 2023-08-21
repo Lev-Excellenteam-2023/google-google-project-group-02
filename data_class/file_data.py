@@ -66,5 +66,3 @@ class FileData:
         except KeyError:
             return 'There no such file_index or line_index'
 
-h = FileData('C:\\Users\\yisra\\Desktop\\to_pass\\study\\lev\\year_3\\exelantim\\butkamp\\google-google-project-group-02\\private\\my_files')
-print("k")
