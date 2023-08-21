@@ -48,12 +48,3 @@ class WordsGraph:
             self.graph[word] += [word_data]
         else:
             self.graph[word] = [word_data]
-
-    def find_match(self, my_str: List[str]) -> List[(int, int)]:
-        # TODO
-        return []
-
-
-
-
-

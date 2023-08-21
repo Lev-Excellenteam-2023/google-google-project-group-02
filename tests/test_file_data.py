@@ -1,6 +1,6 @@
 from data_class.file_data import *
 
-files = FileData()
+files = FileData("../Archive/")
 
 
 def test_file_name():
