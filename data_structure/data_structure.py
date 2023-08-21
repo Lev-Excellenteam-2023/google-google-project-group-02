@@ -67,5 +67,3 @@ class WordsGraph:
                         suggestions += [(index_word[0], index_word[1])]
 
         return suggestions
-
-
