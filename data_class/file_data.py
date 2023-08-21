@@ -1,3 +1,4 @@
+import os
 import re
 from typing import List
 from Utils.consts import FILE_NAME, FILE_CONTENT
@@ -11,13 +12,26 @@ class FileData:
     """
 
     data_dict: dict
+    words_graph: dict
     free_index: int
 
-    def __init__(self):
+    def __init__(self, path):
         self.data_dict = dict()
         self.free_index = 0
+        self.add_all_files_from_path(path)
+        # self.load_words_graph()
 
-    def add_file(self, file_name: str, file_data: str) -> None:
+    def add_all_files_from_path(self, path):
+        for filename in os.listdir(path):
+            file_path = os.path.join(path, filename)
+            if os.path.isfile(file_path):
+                with open(file_path, 'r', encoding="utf8") as file:
+                    content = file.read()
+                    self.add_file(filename, content)
+            elif os.path.isdir(file_path):
+                self.add_all_files_from_path(file_path)
+
+    def add_file(self, file_name: str, file_data: str):
         """
         The func adds a new file to the dictionary
 
@@ -28,6 +42,11 @@ class FileData:
         data_splitted_by_lines: List[str] = re.split('\n+', file_data)
         self.data_dict[self.free_index] = (file_name, data_splitted_by_lines)
         self.free_index += 1
+
+    # def load_words_graph(self):
+    #     for key in self.data_dict:
+    #         for line in self.data_dict[key][FILE_CONTENT]:
+    #     pass
 
     def get_line(self, file_index: int, line_index: int) -> str:
         """
