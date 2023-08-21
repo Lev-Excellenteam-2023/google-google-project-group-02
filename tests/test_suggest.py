@@ -1,10 +1,7 @@
 from data_class.file_data import FileData
-import suggest_engine.suggest as suggest
+import suggest_engine.suggest
 
 
-def test_find_match() -> None:
-    my_files = FileData("C:\\Users\\Ruben\\Desktop\\Excellenteam\\google "
-                        "autocomplete\\Archive\\python-3.8.4-docs-text\\installing")
-
-    # suggest.find_match(["test"], my_files)
-
+# def test_find_match():
+#     assert suggest_engine.suggest.find_match(['in', 'thi'], FileData('C:\\Users\\yisra\\Desktop\\to_pass\\study\\lev\\year_3\\exelantim\\butkamp\\google-google-project-group-02\\private\\my_files'))\
+#         == [0, 1]
