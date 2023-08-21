@@ -1,6 +1,6 @@
 import re
 from typing import List
-from Utils.consts import FILE_NAME, FILE_CONTENT
+from util.consts import FILE_CONTENT
 
 
 class FileData:
