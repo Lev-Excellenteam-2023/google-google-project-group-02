@@ -2,8 +2,10 @@ import os
 import re
 from typing import List
 from util.consts import FILE_CONTENT
+
 from util.remove_punctuation_util import process_sentence
 from data_structure.data_structure import WordData, WordsGraph
+
 
 
 class FileData:
