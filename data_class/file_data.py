@@ -47,7 +47,7 @@ class FileData:
         :param file_data: The data that is contained in the file
         :return: None
         """
-        data_split_by_lines: List[str] = re.split('\n+', file_data)
+        data_split_by_lines: List[str] = file_data.split('\n')
         self.data_dict[self.free_index] = (file_name, data_split_by_lines)
         self.free_index += 1
 
