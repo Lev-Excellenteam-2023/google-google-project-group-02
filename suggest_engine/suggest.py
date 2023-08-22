@@ -87,6 +87,19 @@ def find_top_five_completions(user_input: List[str], data: FileData) -> List[Tup
     first_word = user_input[0]
     suggestions = list()
     if first_word in data.words_graph.graph:
-        suggestions += find_match(user_input, data)
-        suggestions = sort_and_filter_first_k(suggestions, 5)
-    return suggestions
+        suggestions = find_match(user_input, data)
+        return sort_and_filter_first_k(suggestions, 5)
+    #     if len(suggestions) < 5:
+    #         new_suggestions = find_suggestions_with_a_mistake(' '.join(user_input), data, first_word, len(suggestions))
+    #         if len(suggestions) + len(new_suggestions) > 5:
+    #             new_suggestions = sort_and_filter_first_k(new_suggestions, 5 - len(suggestions))
+    #         suggestions += new_suggestions
+    #     if len(suggestions) < 5:
+    #         new_suggestions = match_first_word_mistaken(user_input, data, len(suggestions))
+    #         if len(suggestions) + len(new_suggestions) > 5:
+    #             new_suggestions = sort_and_filter_first_k(new_suggestions, 5 - len(suggestions))
+    #         suggestions += new_suggestions
+    # else:
+    #     suggestions = match_first_word_mistaken(user_input, data)
+
+
