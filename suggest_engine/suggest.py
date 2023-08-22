@@ -149,15 +149,16 @@ def find_top_five_completions(user_input: List[str], data: FileData) -> List[Tup
     #     suggestions = match_first_word_mistaken(user_input, data)
     # return suggestions
 
-    def find_alternative_words(word: str) -> Set[str]:
-        alphabet: List[str] = list(string.ascii_lowercase)
-        alternatives: Set[str] = set()
 
-        for index, _ in enumerate(word):
-            for letter in alphabet:
-                alternatives.add(word[:index] + letter + word[index:])
-                alternatives.add(word[:index + 1] + letter + word[index + 1:])
-                alternatives.add(word[:index] + letter + word[index + 1:])
-                alternatives.add(word[:index] + word[index + 1:])
+def find_alternative_words(word: str) -> Set[str]:
+    alphabet: List[str] = list(string.ascii_lowercase)
+    alternatives: Set[str] = set()
 
-        return alternatives - {word, ''}
+    for index, _ in enumerate(word):
+        for letter in alphabet:
+            alternatives.add(word[:index] + letter + word[index:])
+            alternatives.add(word[:index + 1] + letter + word[index + 1:])
+            alternatives.add(word[:index] + letter + word[index + 1:])
+            alternatives.add(word[:index] + word[index + 1:])
+
+    return alternatives - {word, ''}
