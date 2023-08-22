@@ -1,5 +1,6 @@
-from typing import List, Tuple
+from typing import List, Tuple, Set
 from data_class.file_data import FileData
+import string
 
 
 def find_match(user_input: List[str], data: FileData) -> List[Tuple]:
@@ -90,3 +91,17 @@ def find_top_five_completions(user_input: List[str], data: FileData) -> List[Tup
         suggestions += find_match(user_input, data)
         suggestions = sort_and_filter_first_k(suggestions, 5)
     return suggestions
+
+
+def find_alternative_words(word: str) -> Set[str]:
+    alphabet: List[str] = list(string.ascii_lowercase)
+    alternatives: Set[str] = set()
+
+    for index, _ in enumerate(word):
+        for letter in alphabet:
+            alternatives.add(word[:index] + letter + word[index:])
+            alternatives.add(word[:index + 1] + letter + word[index + 1:])
+            alternatives.add(word[:index] + letter + word[index + 1:])
+            alternatives.add(word[:index] + word[index + 1:])
+
+    return alternatives - {word, ''}
