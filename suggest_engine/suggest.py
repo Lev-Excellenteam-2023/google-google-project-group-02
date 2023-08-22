@@ -45,7 +45,6 @@ def find_match(user_input: List[str], data: FileData) -> List[Tuple]:
     return list(set(suggestions))
 
 
-
 def cut_sentence_till_first_word(sentence: str, index: int) -> str:
     split_sentence = sentence.split()
     cut_sentence = ' '.join(split_sentence[iter] for iter in range(index, len(split_sentence)))
@@ -83,6 +82,7 @@ def sub_char(user_input: str, index: int, sentence: str, first_word_index: int) 
     sentence = cut_sentence_till_first_word(sentence, first_word_index)
     return sentence.find(pre_str) == 0 and sentence.find(suf_str) == index
 
+
 def find_replace_one_char(user_input: str, sentence: str, first_word_index: int):
     for index in range(len(user_input)):
         if replaced_char(user_input, index, sentence, first_word_index):
@@ -118,9 +118,17 @@ def find_suggestions_with_a_mistake(user_input: str, data: FileData, first_word:
     # return suggests
 
 
-def match_first_word_mistaken(user_input: List[str], data: FileData, first_word: str, num_of_found_suggestions: int = 0) \
-        -> List[Tuple]:
-    return list()
+def match_first_word_mistaken(user_input: List[str], data: FileData) -> List[Tuple]:
+    if not user_input:
+        return []
+
+    suggestions: List[Tuple] = []
+    alternatives: Set[str] = find_alternative_words(user_input[0])
+
+    for alternative in alternatives:
+        suggestions += find_match([alternative] + user_input[1:], data)
+
+    return suggestions
 
 
 def sort_and_filter_first_k(suggestions: List[Tuple], k: int) -> List[Tuple]:
