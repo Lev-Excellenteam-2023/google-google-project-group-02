@@ -58,6 +58,7 @@ def find_match(user_input: str, data: FileData, first_word: str) -> list:
     :param data: the data of the files
     :return: the best 5 sentence that match to the given string
     """
+
     suggestions: list = list()
     if first_word in data.words_graph.graph:
         for index_word in data.words_graph.graph[first_word]:
@@ -237,9 +238,7 @@ def match_first_word_mistaken(user_input: List[str], data: FileData) -> list:
         alternative_input = ' '.join([alternative] + user_input[1:])
         new_suggestions = find_match(alternative_input, data, alternative.split(' ')[0])
         if new_suggestions:
-            for suggestion in new_suggestions:
-                suggestion.append(get_score(user_input, alternative_input))
-            # suggestion.append(get_score(user_str, alternative_input)) for suggestion in new_suggestions
+            [suggestion.append(get_score(user_str, alternative_input)) for suggestion in new_suggestions]
         suggestions += new_suggestions
 
     return remove_duplicates(suggestions)
@@ -265,6 +264,7 @@ def find_top_five_completions(user_input: List[str], data: FileData) -> List[Tup
     :param data: A FileData object containing data for suggestions.
     :return: A list of tuples representing the top five completions.
     """
+
     first_word = user_input[0]
     suggestions = list()
     str_input = ' '.join(user_input)
@@ -291,6 +291,7 @@ def find_alternative_words(word: str) -> Set[str]:
     :param word: A string representing the word for which alternative words are generated.
     :return: A set of alternative words.
     """
+
     alphabet: List[str] = list(string.ascii_lowercase)
     alphabet.append(' ')
     alternatives: Set[str] = set()
