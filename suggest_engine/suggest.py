@@ -34,6 +34,7 @@ def find_match(user_input: List[str], data: FileData) -> List[Tuple]:
     :param data: the data of the files
     :return: the best 5 sentence that match to the given string
     """
+
     suggestions: list = list()
     first_word = user_input[0]
 
@@ -119,6 +120,13 @@ def find_suggestions_with_a_mistake(user_input: str, data: FileData, first_word:
 
 
 def match_first_word_mistaken(user_input: List[str], data: FileData) -> List[Tuple]:
+    """
+    This function find the sentences that match the user input when there are a mistake in the first word.
+    :param user_input: the user input
+    :param data: the data of the files
+    :return: the sentences that match the user input when there are a mistake in the first word
+    """
+
     if not user_input:
         return []
 
@@ -132,11 +140,19 @@ def match_first_word_mistaken(user_input: List[str], data: FileData) -> List[Tup
 
 
 def sort_and_filter_first_k(suggestions: List[Tuple], k: int) -> List[Tuple]:
+    """
+    This function sort the given list and return the first k elements.
+    :param suggestions: all the suggestions
+    :param k: the number of elements to return
+    :return: the first k elements
+    """
+
     suggestions.sort(key=lambda x: x[0].lower())
     return suggestions[:k]
 
 
 def find_top_five_completions(user_input: List[str], data: FileData) -> List[Tuple]:
+
     first_word = user_input[0]
     suggestions = list()
     if first_word in data.words_graph.graph:
@@ -159,6 +175,12 @@ def find_top_five_completions(user_input: List[str], data: FileData) -> List[Tup
 
 
 def find_alternative_words(word: str) -> Set[str]:
+    """
+    Find all the words that can be created by adding, removing or replacing one character in the given word.
+    :param word: The word to find alternatives for.
+    :return: All the words with one character difference from the given word.
+    """
+
     alphabet: List[str] = list(string.ascii_lowercase)
     alternatives: Set[str] = set()
 
