@@ -2,6 +2,7 @@ from typing import List, Tuple, Set
 from data_class.file_data import FileData
 import string
 
+
 def help_get_score(user_input: str, sentence_substring: str, score: int, score_to_sub: int) -> int:
     if user_input[:5] == sentence_substring[:5]:
         return score - score_to_sub
@@ -26,7 +27,7 @@ def get_score(user_input: str, sentence_substring: str) -> int:
         return help_get_score(user_input, sentence_substring, score, 2)
 
 
-def find_match(user_input: List[str], data: FileData) -> List[Tuple]:
+def find_match(user_input: str, data: FileData, first_word: str) -> list:
     """
     This function the best 5 sentence that match to the given string.
     :param user_input: the given string
@@ -34,13 +35,12 @@ def find_match(user_input: List[str], data: FileData) -> List[Tuple]:
     :return: the best 5 sentence that match to the given string
     """
     suggestions: list = list()
-    first_word = user_input[0]
+    if first_word in data.words_graph.graph:
+        for index_word in data.words_graph.graph[first_word]:
+            row_content = data.get_line(index_word.file, index_word.row)
+            if user_input in row_content:
+                suggestions += [(row_content, index_word.file, index_word.row)]
 
-    for index_word in data.words_graph.graph[first_word]:
-        row_content = data.get_line(index_word.file, index_word.row)
-        str_input = ' '.join(user_input)
-        if str_input in row_content:
-            suggestions += [(row_content, index_word.file, index_word.row)]
     return list(set(suggestions))
 
 
@@ -50,122 +50,131 @@ def cut_sentence_till_first_word(sentence: str, index: int) -> str:
     return cut_sentence
 
 
-def replaced_char(user_input: str, index: int, sentence: str, first_word_index: int) -> bool:
-    if index == len(user_input) - 1:
+def replaced_char(user_input: str, index: int, sentence: str, first_word_index: int) -> str:
+    if user_input in sentence:
+        return ''
+    user_input_len = len(user_input)
+    if index == user_input_len - 1:
+        sentence = cut_sentence_till_first_word(sentence, first_word_index)
+        if len(sentence) < user_input_len:
+            return ''
         pre_str = user_input[:index]
-        return sentence.find(pre_str) != -1
+        return '' if sentence.find(pre_str) == -1 else sentence[:index + 1]
     if index == 0:
-        suf_str = user_input[index + 1:]
-        return sentence.find(suf_str) != -1
+        suf_str = user_input[1:]
+        find_index = sentence.find(suf_str)
+        return '' if find_index <= 0 else sentence[find_index: find_index + len(user_input)]
     pre_str = user_input[:index]
     suf_str = user_input[index + 1:]
     sentence = cut_sentence_till_first_word(sentence, first_word_index)
-    return sentence.find(pre_str) == 0 and sentence.find(suf_str) == index + 1
+    return '' if sentence.find(pre_str) != 0 or sentence.find(suf_str) != index + 1 else sentence[:user_input_len]
 
 
-def add_char(user_input: str, index: int, sentence: str, first_word_index: int) -> bool:
+def add_char(user_input: str, index: int, sentence: str, first_word_index: int) -> str:
+    if user_input in sentence:
+        return ''
+    end_index: int = len(user_input) + 1
+    sentence = cut_sentence_till_first_word(sentence, first_word_index)
     if index == 0:
-        return sentence.find(user_input) != -1
+        return '' if sentence.find(user_input) == -1 else sentence[: end_index]
     pre_str = user_input[:index]
     suf_str = user_input[index:]
+    return '' if sentence.find(pre_str) != 0 or sentence.find(suf_str) != index + 1 else sentence[: end_index]
+
+
+def sub_char(user_input: str, index: int, sentence: str, first_word_index: int) -> str:
+    if user_input in sentence:
+        return ''
+    end_index: int = len(user_input) - 1
     sentence = cut_sentence_till_first_word(sentence, first_word_index)
-    return sentence.find(pre_str) == 0 and sentence.find(suf_str) == index + 1
-
-
-def sub_char(user_input: str, index: int, sentence: str, first_word_index: int) -> bool:
     if index == 0:
         suf_str = user_input[index + 1:]
-        return sentence.find(suf_str) != -1
+        return '' if sentence.find(suf_str) == -1 else sentence[:end_index]
     pre_str = user_input[:index]
     suf_str = user_input[index + 1:]
-    sentence = cut_sentence_till_first_word(sentence, first_word_index)
-    return sentence.find(pre_str) == 0 and sentence.find(suf_str) == index
-
-
-def find_replace_one_char(user_input: str, sentence: str, first_word_index: int):
-    for index in range(len(user_input)):
-        if replaced_char(user_input, index, sentence, first_word_index):
-            pass
+    return '' if sentence.find(pre_str) != 0 or sentence.find(suf_str) != index else sentence[:end_index]
 
 
 def find_suggestions_with_a_mistake(user_input: str, data: FileData, first_word: str, num_of_found_suggestions: int) \
-        -> List[Tuple]:
+        -> list:
     suggests = list()
     first_word_len = len(first_word)
     user_input_len = len(user_input)
     for index_word in data.words_graph.graph[first_word]:
+        row_content = data.get_line(index_word.file, index_word.row)
         for index in range(first_word_len + 1, user_input_len):
+            substring_sentence = add_char(user_input, index, row_content, index_word.offset)
+            if substring_sentence != '':
+                score = get_score(user_input, substring_sentence)
+                suggests += [(row_content, index_word.file, index_word.row, score)]
+    num_of_found_suggestions += len(suggests)
+    if num_of_found_suggestions < 5:
+        for index_word in data.words_graph.graph[first_word]:
             row_content = data.get_line(index_word.file, index_word.row)
-            if replaced_char(user_input, first_word_len + index, row_content, index_word.offset)\
-                    or add_char(user_input, first_word_len + index, row_content, index_word.offset)\
-                    or sub_char(user_input, first_word_len + index, row_content, index_word.offset):
-                suggests += [(row_content, index_word.file, index_word.row)]
-
-    # suggests = list()
-    # if len(first_word) < 5:
-    #     for index_word in data.words_graph.graph[first_word]:
-    #         file_index = index_word.file
-    #         row_index = index_word.row
-    #         word_offset = index_word.offset
-    #         for iterator in range(5, len(user_input)):
-    #             if replaced_char(user_input, iterator, data.get_line(file_index, row_index), word_offset):
-    #                 suggests.append((file_index, row_index))
-
-    # for
-    # suggests = list()
-    # if len(first_word) < 5:
-    #     for index_word in data.words_graph.graph[first_word]:
-    #         file_index = index_word.file
-    #         row_index = index_word.row
-    #         word_offset = index_word.offset
-    #         for iterator in range(5, len(user_input)):
-    #             if replaced_char(user_input, iterator, data.get_line(file_index, row_index), word_offset):
-    #                 suggests.append((file_index, row_index))
-    # suggests = add_row_content(suggests, data)
-    # if len(suggests) > 5:
-    #     return suggests
-
-    # return suggests
+            for index in range(first_word_len + 1, user_input_len):
+                substring_sentence = replaced_char(user_input, index, row_content, index_word.offset)
+                if substring_sentence != '':
+                    score = get_score(user_input, substring_sentence)
+                    suggests += [(row_content, index_word.file, index_word.row, score)]
+    num_of_found_suggestions += len(suggests)
+    if num_of_found_suggestions < 5:
+        for index_word in data.words_graph.graph[first_word]:
+            row_content = data.get_line(index_word.file, index_word.row)
+            for index in range(first_word_len + 1, user_input_len):
+                substring_sentence = sub_char(user_input, index, row_content, index_word.offset)
+                if substring_sentence != '':
+                    score = get_score(user_input, substring_sentence)
+                    suggests += [(row_content, index_word.file, index_word.row, score)]
+    return list(set(suggests))
 
 
-def match_first_word_mistaken(user_input: List[str], data: FileData) -> List[Tuple]:
+def match_first_word_mistaken(user_input: List[str], data: FileData) -> list:
     if not user_input:
         return []
 
-    suggestions: List[Tuple] = []
+    user_str = ' '.join(user_input)
+    suggestions: list = []
     alternatives: Set[str] = find_alternative_words(user_input[0])
 
     for alternative in alternatives:
-        suggestions += find_match([alternative] + user_input[1:], data)
+        alternative_input = ' '.join([alternative] + user_input[1:])
+        new_suggestions = find_match(alternative_input, data, alternative)
+        new_suggestions = [list(suggestion) for suggestion in new_suggestions]
+        [suggestion.append(get_score(user_str, alternative_input)) for suggestion in new_suggestions]
+        new_suggestions = [tuple(suggestion) for suggestion in new_suggestions]
+        suggestions += new_suggestions
 
-    return suggestions
+    return list(set(suggestions))
 
 
-def sort_and_filter_first_k(suggestions: List[Tuple], k: int) -> List[Tuple]:
-    suggestions.sort(key=lambda x: x[0].lower())
+def sort_and_filter_first_k(suggestions: list, k: int) -> list:
+    suggestions.sort(key=lambda x: (-x[3], x[0].lower()))
     return suggestions[:k]
 
 
 def find_top_five_completions(user_input: List[str], data: FileData) -> List[Tuple]:
     first_word = user_input[0]
     suggestions = list()
+    str_input = ' '.join(user_input)
     if first_word in data.words_graph.graph:
-        suggestions = find_match(user_input, data)
-        return sort_and_filter_first_k(suggestions, 5)
-
-    #     if len(suggestions) < 5:
-    #         new_suggestions = find_suggestions_with_a_mistake(' '.join(user_input), data, first_word, len(suggestions))
-    #         if len(suggestions) + len(new_suggestions) > 5:
-    #             new_suggestions = sort_and_filter_first_k(new_suggestions, 5 - len(suggestions))
-    #         suggestions += new_suggestions
-    #     if len(suggestions) < 5:
-    #         new_suggestions = match_first_word_mistaken(user_input, data, len(suggestions))
-    #         if len(suggestions) + len(new_suggestions) > 5:
-    #             new_suggestions = sort_and_filter_first_k(new_suggestions, 5 - len(suggestions))
-    #         suggestions += new_suggestions
-    # else:
-    #     suggestions = match_first_word_mistaken(user_input, data)
-    # return suggestions
+        suggestions += find_match(str_input, data, first_word)
+        suggestions = [list(suggestion) for suggestion in suggestions]
+        [suggestion.append(len(str_input) * 2) for suggestion in suggestions]
+        if len(suggestions) < 5:
+            new_suggestions = find_suggestions_with_a_mistake(str_input, data, first_word, len(suggestions))
+            new_suggestions = [list(suggestion) for suggestion in new_suggestions]
+            suggestions += new_suggestions
+        if len(suggestions) < 5:
+            new_suggestions = match_first_word_mistaken(user_input, data)
+            new_suggestions = [list(suggestion) for suggestion in new_suggestions]
+            suggestions += new_suggestions
+    else:
+        suggestions += match_first_word_mistaken(user_input, data)
+        suggestions = [list(suggestion) for suggestion in suggestions]
+    sorted_suggestions = sort_and_filter_first_k(suggestions, 5)
+    [suggestion.pop(3) for suggestion in sorted_suggestions]
+    tuple_suggestions = [tuple(suggestion) for suggestion in sorted_suggestions]
+    return tuple_suggestions
 
 
 def find_alternative_words(word: str) -> Set[str]:

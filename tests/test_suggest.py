@@ -1,6 +1,6 @@
 from data_class.file_data import FileData
 from suggest_engine.suggest import find_match, replaced_char, add_char, sub_char, \
-    sort_and_filter_first_k, get_score
+    sort_and_filter_first_k, get_score, find_suggestions_with_a_mistake
 
 data = FileData('..\\private\\my_files')
 
@@ -20,17 +20,17 @@ def test_replace_char():
 
 
 def test_add_char():
-    assert add_char('my cde', 4, 'this is my code it is very nice', 2)
-    assert not add_char('my cde', 3, 'this is my code it is very nice', 2)
-    assert add_char('my coe', 5, 'this is my code it is very nice', 2)
-    assert add_char('y code', 0, 'this is my code it is very nice', 2)
+    assert add_char('my cde', 4, 'this is my code it is very nice', 2) == 'my code'
+    assert not add_char('my cde', 3, 'this is my code it is very nice', 2) == 'my code'
+    assert add_char('my coe', 5, 'this is my code it is very nice', 2) == 'my code'
+    assert add_char('y code', 0, 'this is my code it is very nice', 2) == 'my code'
 
 
 def test_sub_char():
-    assert sub_char('my cdode', 4, 'this is my code it is very nice', 2)
-    assert not sub_char('my cdode', 2, 'this is my code it is very nice', 2)
-    assert not sub_char('my coded', 8, 'this is my code it is very nice', 2)
-    assert sub_char('dmy code', 0, 'this is my code it is very nice', 2)
+    assert sub_char('my cdode', 4, 'this is my code it is very nice', 2) == 'my code'
+    assert not sub_char('my cdode', 2, 'this is my code it is very nice', 2) == 'my code'
+    assert not sub_char('my coded', 8, 'this is my code it is very nice', 2) == 'my code'
+    assert sub_char('dmy code', 0, 'this is my code it is very nice', 2) == 'my code'
 
 
 def test_sort_and_filter_first_k():
@@ -40,19 +40,29 @@ def test_sort_and_filter_first_k():
 
 
 def test_get_score():
+    #
     assert get_score('my code', 'my code') == 14
     assert get_score('my core', 'my code') == 11
     assert get_score('my lode', 'my code') == 10
     assert get_score('mylcore', 'my code') == 9
     assert get_score('mi core', 'my code') == 8
     assert get_score('ny core', 'my code') == 7
+    #
     assert get_score('my codre', 'my code') == 12
     assert get_score('my pcode', 'my code') == 10
     assert get_score('myp code', 'my code') == 8
     assert get_score('mpy code', 'my code') == 6
     assert get_score('lmy code', 'my code') == 4
+    #
     assert get_score('my coe', 'my code') == 10
     assert get_score('my ode', 'my code') == 8
     assert get_score('mycode', 'my code') == 6
     assert get_score('m code', 'my code') == 4
     assert get_score('y code', 'my code') == 2
+
+
+def test_get_mistakes():
+    suggests = find_suggestions_with_a_mistake('is nmot', data, 'is', 0)
+    assert suggests == [('It is not possible to use these functions on objects that are not', 0, 8)]
+    assert find_suggestions_with_a_mistake('is nt', data, 'is', 0) == [
+        ('It is not possible to use these functions on objects that are not', 0, 8)]
