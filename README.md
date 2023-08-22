@@ -29,20 +29,20 @@ The tool works as follows:
 
 3. **Suggestion Algorithm for User Input:**
    Whenever a user provides input, a suggestion algorithm kicks in, generating the top five recommendations to present back to the user. The algorithm initiates by inspecting the first word of the input. It promptly checks whether this word is present within the `data_dict`. If a match is found, the algorithm retrieves the highest-scoring sentences in which the word occurs. Conversely, if the word is absent or found in fewer than five sentences, the algorithm compensates by generating suggestions for words that can be formed with a single error. This step ensures a thorough suggestion coverage for the user's needs.
-
+ 
 
 ## Getting Started
 
 To get started with the tool, you can follow these steps:
 
 1. **Clone the project from GitHub:**
-
-> https://github.com/Lev-Excellenteam-2023/google-google-project-group-02.git
-
+    ```
+    https://github.com/Lev-Excellenteam-2023/google-google-project-group-02.git
+    ```
 2. **Install the required packages using the following command:**
-
-> pip install -r requirements.txt
-
+    ```
+    pip install -r requirements.txt
+    ```
 3. **Set up a path to the archive folder:**
 
 - Create a `.env` file in the top-level directory of the project.
