@@ -96,7 +96,7 @@ def main():
             logging.info(f"Suggested Lines: {suggested_lines}")
 
             execution_time = end_time - start_time
-            logging.info(f"Execution Time: {execution_time} seconds\n")
+            logging.debug(f"Execution Time: {execution_time} seconds\n")
 
         else:
             prev_user_input = ""
@@ -105,6 +105,6 @@ def main():
 if __name__ == "__main__":
     print(BOOT_MESSAGE)
     log_file_path = os.path.join("../logs", 'suggestions_logfile.log')
-    logging.basicConfig(filename=log_file_path, level=logging.INFO)
+    logging.basicConfig(filename=log_file_path, level=logging.DEBUG)
     logging.info(f"Script started at: {datetime.datetime.now()}")
     main()
