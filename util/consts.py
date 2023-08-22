@@ -3,8 +3,9 @@ FILE_NAME = 0
 FILE_CONTENT = 1
 
 # indexes for suggestion result queries
-FILE_NUMBER = 0
-ROW_NUMBER = 1
+ROW_CONTENT = 0
+FILE_NUMBER = 1
+ROW_NUMBER = 2
 
 # print messages
 CLI_WELCOME_MESSAGE = "Hi, welcome to the new search engine!\n" \

@@ -2,8 +2,8 @@ import datetime
 import logging
 import os
 from os import environ, path
-from util.consts import CLI_WELCOME_MESSAGE, INPUT_MESSAGE, FILE_NUMBER, ROW_NUMBER, FILE_NAME, RESET_SYMBOL, \
-    BOOT_MESSAGE
+from util.consts import CLI_WELCOME_MESSAGE, INPUT_MESSAGE, ROW_CONTENT, FILE_NUMBER, ROW_NUMBER, FILE_NAME,\
+    RESET_SYMBOL, BOOT_MESSAGE
 from util.remove_punctuation_util import process_sentence
 from data_class.file_data import FileData
 from suggest_engine.suggest import find_top_five_completions
@@ -28,9 +28,9 @@ def get_best_k_completions(prefix: str, data_cache: FileData) -> List[AutoComple
 
     processed_suggestions = []
     for suggestion in suggestions_metadata:
-        line_content = data_cache.get_line(suggestion[FILE_NUMBER], suggestion[ROW_NUMBER])
-        file_name = data_cache.data_dict[FILE_NUMBER][FILE_NAME]
-        row_number = suggestion[ROW_NUMBER]
+        line_content = suggestion[ROW_CONTENT]
+        file_name = data_cache.data_dict[suggestion[FILE_NUMBER]][FILE_NAME][:-4]
+        row_number = suggestion[ROW_NUMBER] + 1
         processed_suggestions.append(AutoCompleteData(line_content, file_name, row_number))
 
     return processed_suggestions
