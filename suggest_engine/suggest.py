@@ -2,7 +2,6 @@ from typing import List, Tuple, Set
 from data_class.file_data import FileData
 import string
 
-
 def help_get_score(user_input: str, sentence_substring: str, score: int, score_to_sub: int) -> int:
     if user_input[:5] == sentence_substring[:5]:
         return score - score_to_sub
@@ -92,14 +91,25 @@ def find_replace_one_char(user_input: str, sentence: str, first_word_index: int)
 def find_suggestions_with_a_mistake(user_input: str, data: FileData, first_word: str, num_of_found_suggestions: int) \
         -> List[Tuple]:
     suggests = list()
-    if len(first_word) < 5:
-        for index_word in data.words_graph.graph[first_word]:
-            file_index = index_word.file
-            row_index = index_word.row
-            word_offset = index_word.offset
-            for iterator in range(5, len(user_input)):
-                if replaced_char(user_input, iterator, data.get_line(file_index, row_index), word_offset):
-                    suggests.append((file_index, row_index))
+    first_word_len = len(first_word)
+    user_input_len = len(user_input)
+    for index_word in data.words_graph.graph[first_word]:
+        for index in range(first_word_len + 1, user_input_len):
+            row_content = data.get_line(index_word.file, index_word.row)
+            if replaced_char(user_input, first_word_len + index, row_content, index_word.offset)\
+                    or add_char(user_input, first_word_len + index, row_content, index_word.offset)\
+                    or sub_char(user_input, first_word_len + index, row_content, index_word.offset):
+                suggests += [(row_content, index_word.file, index_word.row)]
+
+    # suggests = list()
+    # if len(first_word) < 5:
+    #     for index_word in data.words_graph.graph[first_word]:
+    #         file_index = index_word.file
+    #         row_index = index_word.row
+    #         word_offset = index_word.offset
+    #         for iterator in range(5, len(user_input)):
+    #             if replaced_char(user_input, iterator, data.get_line(file_index, row_index), word_offset):
+    #                 suggests.append((file_index, row_index))
 
     # for
     # suggests = list()

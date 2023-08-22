@@ -56,5 +56,3 @@ def test_get_score():
     assert get_score('mycode', 'my code') == 6
     assert get_score('m code', 'my code') == 4
     assert get_score('y code', 'my code') == 2
-
-
