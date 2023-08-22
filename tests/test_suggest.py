@@ -1,6 +1,6 @@
 from data_class.file_data import FileData
 from suggest_engine.suggest import find_match, replaced_char, add_char, sub_char, \
-    sort_and_filter_first_k, get_score, find_suggestions_with_a_mistake
+    sort_and_filter_first_k, get_score, find_mistaken_suggestions
 
 data = FileData('..\\private\\my_files')
 
@@ -62,7 +62,7 @@ def test_get_score():
 
 
 def test_get_mistakes():
-    suggests = find_suggestions_with_a_mistake('is nmot', data, 'is', 0)
+    suggests = find_mistaken_suggestions('is nmot', data, 'is', 0)
     assert suggests == [('It is not possible to use these functions on objects that are not', 0, 8)]
-    assert find_suggestions_with_a_mistake('is nt', data, 'is', 0) == [
+    assert find_mistaken_suggestions('is nt', data, 'is', 0) == [
         ('It is not possible to use these functions on objects that are not', 0, 8)]
