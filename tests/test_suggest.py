@@ -1,8 +1,8 @@
-from data_structure.file_data import FileData
-from suggest_engine.suggest import find_match, replaced_char, add_char, sub_char, \
+from src.data_structures.files_data import FilesData
+from src.suggest_engine.suggest import find_match, replaced_char, add_char, sub_char, \
     sort_and_filter_first_k, get_score, find_mistaken_suggestions
 
-data = FileData('..\\Archive\\my_files')
+data = FilesData('..\\Archive\\my_files')
 
 
 def test_find_match():

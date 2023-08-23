@@ -1,7 +1,7 @@
 from typing import List, Tuple, Set, Callable
-from data_structure.file_data import FileData
-from util.remove_punctuation_util import process_sentence
-from util.consts import MAX_SUGGESTION, INDEX_FOR_SCORE
+from src.data_structures.files_data import FilesData
+from src.util.remove_punctuation_util import process_sentence
+from src.util.consts import MAX_SUGGESTION, INDEX_FOR_SCORE
 import string
 
 
@@ -52,7 +52,7 @@ def get_score(user_input: str, sentence_substring: str) -> int:
         return help_get_score(user_input, sentence_substring, score, 2)
 
 
-def find_match(user_input: str, data: FileData, first_word: str) -> List[List]:
+def find_match(user_input: str, data: FilesData, first_word: str) -> List[List]:
     """
     This function the best 5 sentence that match to the given string.
     :param first_word: The first word of the user
@@ -160,7 +160,7 @@ def sub_char(user_input: str, index: int, sentence: str, first_word_index: int) 
     return '' if sentence.find(pre_str) != 0 or sentence.find(suf_str) != index else sentence[:end_index]
 
 
-def find_mistaken_suggestions_helper(user_input: str, data: FileData, first_word: str, first_word_len: int,
+def find_mistaken_suggestions_helper(user_input: str, data: FilesData, first_word: str, first_word_len: int,
                                      user_input_len: int, func: Callable) -> List[List]:
     """
     Helper function to find suggestions for one mistaken input based on a given function.
@@ -185,7 +185,7 @@ def find_mistaken_suggestions_helper(user_input: str, data: FileData, first_word
     return suggests
 
 
-def find_certain_mistake(user_input: str, data: FileData, first_word: str, first_word_len: int, user_input_len: int,
+def find_certain_mistake(user_input: str, data: FilesData, first_word: str, first_word_len: int, user_input_len: int,
                          func, error_type: str) -> List[List]:
     """
     Find and suggest corrections for a certain type mistakes in user input(add char, replace char and sub char).
@@ -206,7 +206,7 @@ def find_certain_mistake(user_input: str, data: FileData, first_word: str, first
     return suggests
 
 
-def find_mistaken_suggestions(user_input: str, data: FileData, first_word: str, num_of_found_suggestions: int) \
+def find_mistaken_suggestions(user_input: str, data: FilesData, first_word: str, num_of_found_suggestions: int) \
         -> List[List]:
     """
     Find mistaken input suggestions based on the user's input and data.
@@ -266,7 +266,7 @@ def match_first_word_mistaken_helper(user_input: List[str], user_str: str, data,
     return suggestions
 
 
-def match_first_word_mistaken(user_input: List[str], data: FileData, error_type: str = 'all') -> List[List]:
+def match_first_word_mistaken(user_input: List[str], data: FilesData, error_type: str = 'all') -> List[List]:
     """
     Find suggestions for mistaken input by considering alternative first words.
 
@@ -305,7 +305,7 @@ def sort_and_filter_first_k(suggestions: List[List], k: int) -> List[List]:
     return suggestions[:k]
 
 
-def find_top_five_completions(user_input: List[str], data: FileData, ends_with_white_space: bool) -> List[List]:
+def find_top_five_completions(user_input: List[str], data: FilesData, ends_with_white_space: bool) -> List[List]:
     """
     Find the top five completions for the user's input based on data.
 

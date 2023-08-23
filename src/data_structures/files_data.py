@@ -1,12 +1,12 @@
 import os
 from typing import List
-from util.consts import FILE_CONTENT
+from src.util.consts import FILE_CONTENT
 
-from util.remove_punctuation_util import process_sentence
-from data_structure.data_structure import WordData, WordsGraph
+from src.util.remove_punctuation_util import process_sentence
+from src.data_structures.data_structure import WordData, WordsGraph
 
 
-class FileData:
+class FilesData:
     """
     A class that will save the data lines in a dict - each file will get an index as a key and the value will be a
     tuple with 2 organs. the first organ will be the file name and the second will be a list with the lines data -

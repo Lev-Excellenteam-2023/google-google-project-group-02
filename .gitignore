@@ -18,8 +18,8 @@ ENV/
 *.DS_Store
 
 # Logs and temporary files
+src/logs
 *.log
-logs/
 *.tmp
 *.temp
 

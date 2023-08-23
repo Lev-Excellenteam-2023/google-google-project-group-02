@@ -2,17 +2,17 @@ import datetime
 import logging
 import os
 from os import environ, path
-from util.consts import CLI_WELCOME_MESSAGE, INPUT_MESSAGE, ROW_CONTENT, FILE_NUMBER, ROW_NUMBER, FILE_NAME,\
+from src.util.consts import CLI_WELCOME_MESSAGE, INPUT_MESSAGE, ROW_CONTENT, FILE_NUMBER, ROW_NUMBER, FILE_NAME,\
     RESET_SYMBOL, BOOT_MESSAGE
-from util.remove_punctuation_util import process_sentence
-from data_structure.file_data import FileData
-from suggest_engine.suggest import find_top_five_completions
-from data_structure.auto_complete_data import AutoCompleteData
+from src.util.remove_punctuation_util import process_sentence
+from src.data_structures.files_data import FilesData
+from src.suggest_engine.suggest import find_top_five_completions
+from src.data_structures.auto_complete_data import AutoCompleteData
 from typing import List
 from time import time
 
 
-def get_best_k_completions(prefix: str, data_cache: FileData) -> List[AutoCompleteData]:
+def get_best_k_completions(prefix: str, data_cache: FilesData) -> List[AutoCompleteData]:
     """
     return five best suggestions matching a user input.
     :param prefix: user input to find suggestions for.
@@ -46,7 +46,7 @@ def configure_environment() -> str:
     try:
         # attempt to use .env file
         import dotenv
-        if path.exists(r"..\.env"):
+        if path.exists(r"../../.env"):
             dotenv.load_dotenv()
             return environ.get("ARCHIVE_FOLDER_PATH")
     except ImportError as e:
@@ -75,7 +75,7 @@ def requested_reset(user_input: str) -> bool:
 
 
 def main():
-    uploaded_files_cache = FileData(configure_environment())
+    uploaded_files_cache = FilesData(configure_environment())
     print(CLI_WELCOME_MESSAGE)
     prev_user_input: str = ""
     while True:
@@ -101,6 +101,7 @@ def main():
 if __name__ == "__main__":
     print(BOOT_MESSAGE)
     log_file_path: str = os.path.join("../logs", 'suggestions_logfile.log')
+    os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
     logging.basicConfig(filename=log_file_path, level=logging.DEBUG)
     logging.info(f"Script started at: {datetime.datetime.now()}")
     main()

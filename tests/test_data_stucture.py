@@ -1,4 +1,4 @@
-from data_structure.data_structure import WordData, WordsGraph
+from src.data_structures.data_structure import WordData, WordsGraph
 
 
 def test_is_my_neighbors() -> None:
