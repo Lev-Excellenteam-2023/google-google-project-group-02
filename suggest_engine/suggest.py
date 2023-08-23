@@ -1,4 +1,4 @@
-from typing import List, Tuple, Set
+from typing import List, Tuple, Set, Callable
 from data_structure.file_data import FileData
 from util.remove_punctuation_util import process_sentence
 import string
@@ -38,7 +38,7 @@ def get_score(user_input: str, sentence_substring: str) -> int:
     :param sentence_substring: A string containing a substring of a sentence to compare with.
     :return: An integer representing the calculated score.
     """
-    score = len(user_input) * 2
+    score: int = len(user_input) * 2
     if user_input == sentence_substring:
         return score
     if len(user_input) == len(sentence_substring):
@@ -51,7 +51,7 @@ def get_score(user_input: str, sentence_substring: str) -> int:
         return help_get_score(user_input, sentence_substring, score, 2)
 
 
-def find_match(user_input: str, data: FileData, first_word: str) -> list:
+def find_match(user_input: str, data: FileData, first_word: str) -> List[List]:
     """
     This function the best 5 sentence that match to the given string.
     :param first_word: The first word of the user
@@ -63,8 +63,8 @@ def find_match(user_input: str, data: FileData, first_word: str) -> list:
     suggestions: list = list()
     if first_word in data.words_graph.graph:
         for index_word in data.words_graph.graph[first_word]:
-            row_content = data.get_line(index_word.file, index_word.row)
-            clean_row_content = ' '.join(process_sentence(row_content))
+            row_content: str = data.get_line(index_word.file, index_word.row)
+            clean_row_content: str = ' '.join(process_sentence(row_content))
             if user_input in clean_row_content:
                 suggestions += [[row_content, index_word.file, index_word.row]]
 
@@ -82,8 +82,8 @@ def cut_sentence_till_first_word(sentence: str, index: int) -> str:
     :param index: An integer representing the starting index for cutting the sentence.
     :return: A string containing the modified sentence.
     """
-    split_sentence = sentence.split()
-    cut_sentence = ' '.join(split_sentence[iter] for iter in range(index, len(split_sentence)))
+    split_sentence: List[str] = sentence.split()
+    cut_sentence: str = ' '.join(split_sentence[iter] for iter in range(index, len(split_sentence)))
     return cut_sentence
 
 
@@ -99,20 +99,20 @@ def replaced_char(user_input: str, index: int, sentence: str, first_word_index: 
     """
     if user_input in sentence:
         return ''
-    user_input_len = len(user_input)
+    user_input_len: int = len(user_input)
     if index == user_input_len - 1:
-        sentence = cut_sentence_till_first_word(sentence, first_word_index)
+        sentence: str = cut_sentence_till_first_word(sentence, first_word_index)
         if len(sentence) < user_input_len:
             return ''
-        pre_str = user_input[:index]
+        pre_str: str = user_input[:index]
         return '' if sentence.find(pre_str) == -1 else sentence[:index + 1]
     if index == 0:
-        suf_str = user_input[1:]
-        find_index = sentence.find(suf_str)
+        suf_str: str = user_input[1:]
+        find_index: int = sentence.find(suf_str)
         return '' if find_index <= 0 else sentence[find_index: find_index + len(user_input)]
-    pre_str = user_input[:index]
-    suf_str = user_input[index + 1:]
-    sentence = cut_sentence_till_first_word(sentence, first_word_index)
+    pre_str: str = user_input[:index]
+    suf_str: str = user_input[index + 1:]
+    sentence: str = cut_sentence_till_first_word(sentence, first_word_index)
     return '' if sentence.find(pre_str) != 0 or sentence.find(suf_str) != index + 1 else sentence[:user_input_len]
 
 
@@ -129,11 +129,11 @@ def add_char(user_input: str, index: int, sentence: str, first_word_index: int) 
     if user_input in sentence:
         return ''
     end_index: int = len(user_input) + 1
-    sentence = cut_sentence_till_first_word(sentence, first_word_index)
+    sentence: str = cut_sentence_till_first_word(sentence, first_word_index)
     if index == 0:
         return '' if sentence.find(user_input) == -1 else sentence[: end_index]
-    pre_str = user_input[:index]
-    suf_str = user_input[index:]
+    pre_str: str = user_input[:index]
+    suf_str: str = user_input[index:]
     return '' if sentence.find(pre_str) != 0 or sentence.find(suf_str) != index + 1 else sentence[: end_index]
 
 
@@ -150,17 +150,17 @@ def sub_char(user_input: str, index: int, sentence: str, first_word_index: int) 
     if user_input in sentence:
         return ''
     end_index: int = len(user_input) - 1
-    sentence = cut_sentence_till_first_word(sentence, first_word_index)
+    sentence: str = cut_sentence_till_first_word(sentence, first_word_index)
     if index == 0:
-        suf_str = user_input[index + 1:]
+        suf_str: str = user_input[index + 1:]
         return '' if sentence.find(suf_str) == -1 else sentence[:end_index]
-    pre_str = user_input[:index]
-    suf_str = user_input[index + 1:]
+    pre_str: str = user_input[:index]
+    suf_str: str = user_input[index + 1:]
     return '' if sentence.find(pre_str) != 0 or sentence.find(suf_str) != index else sentence[:end_index]
 
 
 def find_mistaken_suggestions_helper(user_input: str, data: FileData, first_word: str, first_word_len: int,
-                                     user_input_len: int, func) -> list:
+                                     user_input_len: int, func: Callable) -> List[List]:
     """
     Helper function to find suggestions for one mistaken input based on a given function.
 
@@ -174,26 +174,39 @@ def find_mistaken_suggestions_helper(user_input: str, data: FileData, first_word
     """
     suggests = list()
     for index_word in data.words_graph.graph[first_word]:
-        row_content = data.get_line(index_word.file, index_word.row)
-        clean_row_content = ' '.join(process_sentence(row_content))
+        row_content: str = data.get_line(index_word.file, index_word.row)
+        clean_row_content: str = ' '.join(process_sentence(row_content))
         for index in range(first_word_len + 1, user_input_len):
-            substring_sentence = func(user_input, index, clean_row_content, index_word.offset)
+            substring_sentence: str = func(user_input, index, clean_row_content, index_word.offset)
             if substring_sentence != '':
-                score = get_score(user_input, substring_sentence)
+                score: int = get_score(user_input, substring_sentence)
                 suggests += [(row_content, index_word.file, index_word.row, score)]
     return suggests
 
 
 def find_certain_mistake(user_input: str, data: FileData, first_word: str, first_word_len: int, user_input_len: int,
-                         func, error_type: str):
-    suggests = find_mistaken_suggestions_helper(user_input, data, first_word, first_word_len, user_input_len, func)
+                         func, error_type: str) -> List[List]:
+    """
+    Find and suggest corrections for a certain type mistakes in user input(add char, replace char and sub char).
+
+    :param user_input: The user's input string for which mistakes are to be detected and suggestions provided.
+    :param data: The dataset or FileData object containing information for mistake detection.
+    :param first_word: The first word of the user's input.
+    :param first_word_len: The length of the first word in characters.
+    :param user_input_len: The total length of the user's input string.
+    :param func: A function used for detecting mistakes in user input.
+    :param error_type: The type of error to search for (e.g., spelling, grammar).
+
+    :return: A list of suggested corrections or fixes for the detected mistakes.
+    """
+    suggests: List[List] = find_mistaken_suggestions_helper(user_input, data, first_word, first_word_len, user_input_len, func)
     if first_word_len >= 5:
         suggests += match_first_word_mistaken(user_input.split(' '), data, error_type)
     return suggests
 
 
 def find_mistaken_suggestions(user_input: str, data: FileData, first_word: str, num_of_found_suggestions: int) \
-        -> list:
+        -> List[List]:
     """
     Find mistaken input suggestions based on the user's input and data.
 
@@ -203,10 +216,10 @@ def find_mistaken_suggestions(user_input: str, data: FileData, first_word: str, 
     :param num_of_found_suggestions: An integer representing the number of found suggestions.
     :return: A list of suggestions as tuples.
     """
-    first_word_len = len(first_word)
-    user_input_len = len(user_input)
+    first_word_len: int = len(first_word)
+    user_input_len: int = len(user_input)
 
-    suggests = find_certain_mistake(user_input, data, first_word, first_word_len, user_input_len, add_char, 'add')
+    suggests: List[List] = find_certain_mistake(user_input, data, first_word, first_word_len, user_input_len, add_char, 'add')
     num_of_found_suggestions += len(suggests)
     if num_of_found_suggestions < 5:
         suggests += find_certain_mistake(user_input, data, first_word, first_word_len, user_input_len, replaced_char,
@@ -217,32 +230,42 @@ def find_mistaken_suggestions(user_input: str, data: FileData, first_word: str, 
     return remove_duplicates(suggests)
 
 
-def remove_duplicates(suggestions: list) -> list:
+def remove_duplicates(suggestions: List[List]) -> List[List]:
     """
     Remove duplicate suggestions from a list of suggestions.
 
     :param suggestions: A list of suggestions as tuples.
     :return: A list of suggestions with duplicates removed.
     """
-    tuple_suggestions = [tuple(suggestion) for suggestion in suggestions]
-    set_suggestions = list(set(tuple_suggestions))
+    tuple_suggestions: List[Tuple] = [tuple(suggestion) for suggestion in suggestions]
+    set_suggestions: List[Tuple] = list(set(tuple_suggestions))
     return [list(suggestion) for suggestion in set_suggestions]
 
 
-def match_first_word_mistaken_helper(user_input: List[str], user_str: str, data, error_type: str) -> list:
+def match_first_word_mistaken_helper(user_input: List[str], user_str: str, data, error_type: str) -> List[List]:
+    """
+    Generate suggestions based on alternative words for the first word in user input.
+
+    :param user_input: A list of words in the user's input.
+    :param user_str: The original user input string.
+    :param data: The data or dataset used for generating suggestions.
+    :param error_type: The type of error to consider (e.g., spelling, grammar).
+
+    :return: A list of suggestions based on alternative first words.
+    """
     alternatives: Set[str] = find_alternative_words(user_input[0], error_type)
-    suggestions = list()
+    suggestions: List[List] = list()
 
     for alternative in alternatives:
-        alternative_input = ' '.join([alternative] + user_input[1:])
-        new_suggestions = find_match(alternative_input, data, alternative.split(' ')[0])
+        alternative_input: str = ' '.join([alternative] + user_input[1:])
+        new_suggestions: List[List] = find_match(alternative_input, data, alternative.split(' ')[0])
         if new_suggestions:
             [suggestion.append(get_score(user_str, alternative_input)) for suggestion in new_suggestions]
         suggestions += new_suggestions
     return suggestions
 
 
-def match_first_word_mistaken(user_input: List[str], data: FileData, error_type: str = 'all') -> list:
+def match_first_word_mistaken(user_input: List[str], data: FileData, error_type: str = 'all') -> List[List]:
     """
     Find suggestions for mistaken input by considering alternative first words.
 
@@ -255,7 +278,7 @@ def match_first_word_mistaken(user_input: List[str], data: FileData, error_type:
     if not user_input:
         return []
 
-    user_str = ' '.join(user_input)
+    user_str: str = ' '.join(user_input)
     suggestions: list = []
     if error_type == 'all':
         suggestions += match_first_word_mistaken_helper(user_input, user_str, data, 'add')
@@ -269,7 +292,7 @@ def match_first_word_mistaken(user_input: List[str], data: FileData, error_type:
     return remove_duplicates(suggestions)
 
 
-def sort_and_filter_first_k(suggestions: list, k: int) -> list:
+def sort_and_filter_first_k(suggestions: List[List], k: int) -> List[List]:
     """
     Sort a list of suggestions by score from high to low and filter it, keeping the top k suggestions.
 
@@ -281,30 +304,37 @@ def sort_and_filter_first_k(suggestions: list, k: int) -> list:
     return suggestions[:k]
 
 
-def find_top_five_completions(user_input: List[str], data: FileData) -> List[Tuple]:
+def find_top_five_completions(user_input: List[str], data: FileData, ends_with_white_space: bool) -> List[List]:
     """
     Find the top five completions for the user's input based on data.
 
+    :param ends_with_white_space: bool if the input ands with a white space.
     :param user_input: A list of strings representing the user's input.
     :param data: A FileData object containing data for suggestions.
     :return: A list of tuples representing the top five completions.
     """
 
-    first_word = user_input[0]
-    suggestions = list()
-    str_input = ' '.join(user_input)
-    if first_word in data.words_graph.graph:
-        suggestions += find_match(str_input, data, first_word)
+    first_word: str = user_input[0]
+    suggestions: List[List] = list()
+    str_input: str = ' '.join(user_input)
+    if len(user_input) == 1 and not ends_with_white_space:
+        filtered_keys: List[str] = [key for key in data.words_graph.graph if key.startswith(str_input)]
+        for key in filtered_keys:
+            suggestions += find_match(str_input, data, key)
         [suggestion.append(len(str_input) * 2) for suggestion in suggestions]
-        if len(suggestions) < 5:
-            new_suggestions = find_mistaken_suggestions(str_input, data, first_word, len(suggestions))
-            suggestions += new_suggestions
-        if len(suggestions) < 5 and len(user_input[0]) < 5:
-            new_suggestions = match_first_word_mistaken(user_input, data)
-            suggestions += new_suggestions
     else:
-        suggestions += match_first_word_mistaken(user_input, data)
-    sorted_suggestions = sort_and_filter_first_k(suggestions, 5)
+        if first_word in data.words_graph.graph:
+            suggestions += find_match(str_input, data, first_word)
+            [suggestion.append(len(str_input) * 2) for suggestion in suggestions]
+            if len(suggestions) < 5:
+                new_suggestions: List[List] = find_mistaken_suggestions(str_input, data, first_word, len(suggestions))
+                suggestions += new_suggestions
+            if len(suggestions) < 5 and len(user_input[0]) < 5:
+                new_suggestions: List[List] = match_first_word_mistaken(user_input, data)
+                suggestions += new_suggestions
+        else:
+            suggestions += match_first_word_mistaken(user_input, data)
+    sorted_suggestions: List[List] = sort_and_filter_first_k(suggestions, 5)
     [suggestion.pop(3) for suggestion in sorted_suggestions]
     return remove_duplicates(sorted_suggestions)
 
