@@ -101,6 +101,7 @@ def main():
 if __name__ == "__main__":
     print(BOOT_MESSAGE)
     log_file_path: str = os.path.join("../logs", 'suggestions_logfile.log')
+    os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
     logging.basicConfig(filename=log_file_path, level=logging.DEBUG)
     logging.info(f"Script started at: {datetime.datetime.now()}")
     main()
