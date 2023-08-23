@@ -5,17 +5,13 @@ from os import environ, path
 from util.consts import CLI_WELCOME_MESSAGE, INPUT_MESSAGE, ROW_CONTENT, FILE_NUMBER, ROW_NUMBER, FILE_NAME,\
     RESET_SYMBOL, BOOT_MESSAGE
 from util.remove_punctuation_util import process_sentence
-from data_class.file_data import FileData
+from data_structure.file_data import FileData
 from suggest_engine.suggest import find_top_five_completions
 from data_structure.auto_complete_data import AutoCompleteData
 from typing import List
 from time import time
 
 
-# todo -  waiting for integration with completion engin
-# from suggest_engine.suggest import find_top_five_completions
-
-# todo -  waiting for integration with completion engin
 def get_best_k_completions(prefix: str, data_cache: FileData) -> List[AutoCompleteData]:
     """
     return five best suggestions matching a user input.
@@ -23,14 +19,14 @@ def get_best_k_completions(prefix: str, data_cache: FileData) -> List[AutoComple
     :param data_cache: dictionary mapping a file number, to its content split into lines.
     :return: list of five AutoCompleteData objects, each containing a suggestion line and metadata about it.
     """
-    processed_prefix = process_sentence(prefix)
-    suggestions_metadata = find_top_five_completions(processed_prefix, data_cache)
+    processed_prefix: List[str] = process_sentence(prefix)
+    suggestions_metadata: List[List] = find_top_five_completions(processed_prefix, data_cache, prefix.endswith(' '))
 
-    processed_suggestions = []
+    processed_suggestions: List[AutoCompleteData] = []
     for suggestion in suggestions_metadata:
-        line_content = suggestion[ROW_CONTENT]
-        file_name = data_cache.data_dict[suggestion[FILE_NUMBER]][FILE_NAME][:-4]
-        row_number = suggestion[ROW_NUMBER] + 1
+        line_content: str = suggestion[ROW_CONTENT]
+        file_name: str = data_cache.data_dict[suggestion[FILE_NUMBER]][FILE_NAME][:-4]
+        row_number: int = suggestion[ROW_NUMBER] + 1
         processed_suggestions.append(AutoCompleteData(line_content, file_name, row_number))
 
     return processed_suggestions
@@ -83,19 +79,19 @@ def main():
     print(CLI_WELCOME_MESSAGE)
     prev_user_input: str = ""
     while True:
-        user_input = read_input_from_user(prev_user_input)
+        user_input: str = read_input_from_user(prev_user_input)
         prev_user_input += user_input
         if not requested_reset(user_input):
             logging.info(f"User Input: {prev_user_input}")
 
-            start_time = time()
-            suggested_lines = get_best_k_completions(prev_user_input, uploaded_files_cache)
-            end_time = time()
+            start_time: float = time()
+            suggested_lines: List[AutoCompleteData] = get_best_k_completions(prev_user_input, uploaded_files_cache)
+            end_time: float = time()
 
             print_results(suggested_lines)
             logging.info(f"Suggested Lines: {suggested_lines}")
 
-            execution_time = end_time - start_time
+            execution_time: float = end_time - start_time
             logging.debug(f"Execution Time: {execution_time} seconds\n")
 
         else:
@@ -104,7 +100,7 @@ def main():
 
 if __name__ == "__main__":
     print(BOOT_MESSAGE)
-    log_file_path = os.path.join("../logs", 'suggestions_logfile.log')
+    log_file_path: str = os.path.join("../logs", 'suggestions_logfile.log')
     logging.basicConfig(filename=log_file_path, level=logging.DEBUG)
     logging.info(f"Script started at: {datetime.datetime.now()}")
     main()

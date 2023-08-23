@@ -1,3 +1,9 @@
+# suggestions number
+MAX_SUGGESTION = 5
+
+# from witch index, the score of a mistake is the same
+INDEX_FOR_SCORE = 5
+
 # indexes for loading data
 FILE_NAME = 0
 FILE_CONTENT = 1
