@@ -1,6 +1,7 @@
 from typing import List, Tuple, Set, Callable
 from data_structure.file_data import FileData
 from util.remove_punctuation_util import process_sentence
+from util.consts import MAX_SUGGESTION, INDEX_FOR_SCORE
 import string
 
 
@@ -18,11 +19,11 @@ def help_get_score(user_input: str, sentence_substring: str, score: int, score_t
     :param score_to_sub: An integer representing the score reduction value.
     :return: An integer representing the modified score.
     """
-    if user_input[:5] == sentence_substring[:5]:
+    if user_input[:INDEX_FOR_SCORE] == sentence_substring[:INDEX_FOR_SCORE]:
         return score - score_to_sub
-    for iterator in range(min(5, len(user_input), len(sentence_substring))):
+    for iterator in range(min(INDEX_FOR_SCORE, len(user_input), len(sentence_substring))):
         if user_input[iterator] != sentence_substring[iterator]:
-            score -= (5 - iterator) * score_to_sub
+            score -= (INDEX_FOR_SCORE - iterator) * score_to_sub
             break
     return score
 
@@ -200,7 +201,7 @@ def find_certain_mistake(user_input: str, data: FileData, first_word: str, first
     :return: A list of suggested corrections or fixes for the detected mistakes.
     """
     suggests: List[List] = find_mistaken_suggestions_helper(user_input, data, first_word, first_word_len, user_input_len, func)
-    if first_word_len >= 5:
+    if first_word_len >= MAX_SUGGESTION:
         suggests += match_first_word_mistaken(user_input.split(' '), data, error_type)
     return suggests
 
@@ -221,11 +222,11 @@ def find_mistaken_suggestions(user_input: str, data: FileData, first_word: str, 
 
     suggests: List[List] = find_certain_mistake(user_input, data, first_word, first_word_len, user_input_len, add_char, 'add')
     num_of_found_suggestions += len(suggests)
-    if num_of_found_suggestions < 5:
+    if num_of_found_suggestions < MAX_SUGGESTION:
         suggests += find_certain_mistake(user_input, data, first_word, first_word_len, user_input_len, replaced_char,
                                          'replace')
     num_of_found_suggestions += len(suggests)
-    if num_of_found_suggestions < 5:
+    if num_of_found_suggestions < MAX_SUGGESTION:
         suggests += find_certain_mistake(user_input, data, first_word, first_word_len, user_input_len, sub_char, 'sub')
     return remove_duplicates(suggests)
 
@@ -282,9 +283,9 @@ def match_first_word_mistaken(user_input: List[str], data: FileData, error_type:
     suggestions: list = []
     if error_type == 'all':
         suggestions += match_first_word_mistaken_helper(user_input, user_str, data, 'add')
-        if len(suggestions) < 5:
+        if len(suggestions) < MAX_SUGGESTION:
             suggestions += match_first_word_mistaken_helper(user_input, user_str, data, 'replace')
-        if len(suggestions) < 5:
+        if len(suggestions) < MAX_SUGGESTION:
             suggestions += match_first_word_mistaken_helper(user_input, user_str, data, 'sub')
     else:
         suggestions += match_first_word_mistaken_helper(user_input, user_str, data, error_type)
@@ -322,19 +323,21 @@ def find_top_five_completions(user_input: List[str], data: FileData, ends_with_w
         for key in filtered_keys:
             suggestions += find_match(str_input, data, key)
         [suggestion.append(len(str_input) * 2) for suggestion in suggestions]
+        if len(suggestions) < MAX_SUGGESTION:
+            suggestions += match_first_word_mistaken(user_input, data)
     else:
         if first_word in data.words_graph.graph:
             suggestions += find_match(str_input, data, first_word)
             [suggestion.append(len(str_input) * 2) for suggestion in suggestions]
-            if len(suggestions) < 5:
+            if len(suggestions) < MAX_SUGGESTION:
                 new_suggestions: List[List] = find_mistaken_suggestions(str_input, data, first_word, len(suggestions))
                 suggestions += new_suggestions
-            if len(suggestions) < 5 and len(user_input[0]) < 5:
+            if len(suggestions) < MAX_SUGGESTION and len(user_input[0]) < MAX_SUGGESTION:
                 new_suggestions: List[List] = match_first_word_mistaken(user_input, data)
                 suggestions += new_suggestions
         else:
             suggestions += match_first_word_mistaken(user_input, data)
-    sorted_suggestions: List[List] = sort_and_filter_first_k(suggestions, 5)
+    sorted_suggestions: List[List] = sort_and_filter_first_k(suggestions, MAX_SUGGESTION)
     [suggestion.pop(3) for suggestion in sorted_suggestions]
     return remove_duplicates(sorted_suggestions)
 
