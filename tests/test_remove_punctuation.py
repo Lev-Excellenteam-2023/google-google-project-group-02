@@ -1,5 +1,4 @@
-import pytest
-from util import remove_punctuation_util
+from src.util import remove_punctuation_util
 
 # test file for remove_punctuation_util.py
 
@@ -10,7 +9,7 @@ SENTENCE_02_WITH_SPACES = "Hi    there   have    you    ever    seen    a    wha
 
 def test_remove_punctuation():
     assert remove_punctuation_util.remove_punctuation_from_sentence(
-        SENTENCE_02) == "Hi there have you ever seen a whale"
+        SENTENCE_02) == "hi there have you ever seen a whale"
 
 
 def test_remove_white_spaces():
@@ -21,8 +20,7 @@ def test_remove_white_spaces():
 
 
 def test_process_sentence():
-    assert remove_punctuation_util.process_sentence(SENTENCE_01) == ['Hi', 'there', 'have', 'you',
+    assert remove_punctuation_util.process_sentence(SENTENCE_01) == ['hi', 'there', 'have', 'you',
                                                                      'ever', 'seen', 'a', 'whale']
 
 
-pytest.main(['-v'])

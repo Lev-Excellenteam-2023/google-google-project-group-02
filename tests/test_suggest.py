@@ -1,5 +1,5 @@
-from data_structure.file_data import FileData
-from suggest_engine.suggest import find_match, replaced_char, add_char, sub_char, \
+from src.data_structure.file_data import FileData
+from src.suggest_engine.suggest import find_match, replaced_char, add_char, sub_char, \
     sort_and_filter_first_k, get_score, find_mistaken_suggestions
 
 data = FileData('..\\Archive\\my_files')
