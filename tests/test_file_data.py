@@ -1,6 +1,6 @@
-from data_class.file_data import *
+from src.data_structures.files_data import *
 
-files = FileData("../Archive/")
+files = FilesData("../Archive/")
 
 
 def test_file_name():
@@ -25,9 +25,10 @@ def test_add_file_data_with_a_few_new_lines():
     files.add_file('google', '1\n\nch01.qxd\n\n1/3/2001\n\n2\n\n9:44 AM\n\nChapter 1\n\nPage 2\n\n•\n\nIntroduction '
                              'to Networking and the OSI Model\n\nsend back to the mainframe. For this reason, '
                              'these terminals were often')
-    assert files.data_dict[index][1] == ['1', 'ch01.qxd', '1/3/2001', '2', '9:44 AM', 'Chapter 1', 'Page 2', '•',
-                                         'Introduction to Networking and the OSI Model',
+    assert files.data_dict[index][1] == ['1', '', 'ch01.qxd', '', '1/3/2001', '', '2', '', '9:44 AM', '', 'Chapter 1', '',
+                                         'Page 2', '', '•','', 'Introduction to Networking and the OSI Model', '',
                                          'send back to the mainframe. For this reason, these terminals were often']
+
 
 
 def test_get_line():
