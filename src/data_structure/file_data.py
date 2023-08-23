@@ -1,9 +1,9 @@
 import os
 from typing import List
-from util.consts import FILE_CONTENT
+from src.util.consts import FILE_CONTENT
 
-from util.remove_punctuation_util import process_sentence
-from data_structure.data_structure import WordData, WordsGraph
+from src.util.remove_punctuation_util import process_sentence
+from src.data_structure.data_structure import WordData, WordsGraph
 
 
 class FileData:

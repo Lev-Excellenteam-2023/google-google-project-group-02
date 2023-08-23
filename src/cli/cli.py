@@ -2,12 +2,12 @@ import datetime
 import logging
 import os
 from os import environ, path
-from util.consts import CLI_WELCOME_MESSAGE, INPUT_MESSAGE, ROW_CONTENT, FILE_NUMBER, ROW_NUMBER, FILE_NAME,\
+from src.util.consts import CLI_WELCOME_MESSAGE, INPUT_MESSAGE, ROW_CONTENT, FILE_NUMBER, ROW_NUMBER, FILE_NAME,\
     RESET_SYMBOL, BOOT_MESSAGE
-from util.remove_punctuation_util import process_sentence
-from data_structure.file_data import FileData
-from suggest_engine.suggest import find_top_five_completions
-from data_structure.auto_complete_data import AutoCompleteData
+from src.util.remove_punctuation_util import process_sentence
+from src.data_structure.file_data import FileData
+from src.suggest_engine.suggest import find_top_five_completions
+from src.data_structure.auto_complete_data import AutoCompleteData
 from typing import List
 from time import time
 
@@ -46,7 +46,7 @@ def configure_environment() -> str:
     try:
         # attempt to use .env file
         import dotenv
-        if path.exists(r"..\.env"):
+        if path.exists(r"../../.env"):
             dotenv.load_dotenv()
             return environ.get("ARCHIVE_FOLDER_PATH")
     except ImportError as e:

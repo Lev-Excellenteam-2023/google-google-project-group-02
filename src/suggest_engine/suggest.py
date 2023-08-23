@@ -1,7 +1,7 @@
 from typing import List, Tuple, Set, Callable
-from data_structure.file_data import FileData
-from util.remove_punctuation_util import process_sentence
-from util.consts import MAX_SUGGESTION, INDEX_FOR_SCORE
+from src.data_structure.file_data import FileData
+from src.util.remove_punctuation_util import process_sentence
+from src.util.consts import MAX_SUGGESTION, INDEX_FOR_SCORE
 import string
 
 
