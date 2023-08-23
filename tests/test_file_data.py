@@ -1,4 +1,4 @@
-from data_class.file_data import *
+from data_structure.file_data import *
 
 files = FileData("../Archive/")
 

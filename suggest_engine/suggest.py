@@ -1,5 +1,6 @@
 from typing import List, Tuple, Set
-from data_class.file_data import FileData
+from data_structure.file_data import FileData
+from util.remove_punctuation_util import process_sentence
 import string
 
 
@@ -63,7 +64,8 @@ def find_match(user_input: str, data: FileData, first_word: str) -> list:
     if first_word in data.words_graph.graph:
         for index_word in data.words_graph.graph[first_word]:
             row_content = data.get_line(index_word.file, index_word.row)
-            if user_input in row_content and (row_content, index_word.file, index_word.row):
+            clean_row_content = ' '.join(process_sentence(row_content))
+            if user_input in clean_row_content:
                 suggestions += [[row_content, index_word.file, index_word.row]]
 
     return remove_duplicates(suggestions)
@@ -173,11 +175,20 @@ def find_mistaken_suggestions_helper(user_input: str, data: FileData, first_word
     suggests = list()
     for index_word in data.words_graph.graph[first_word]:
         row_content = data.get_line(index_word.file, index_word.row)
+        clean_row_content = ' '.join(process_sentence(row_content))
         for index in range(first_word_len + 1, user_input_len):
-            substring_sentence = func(user_input, index, row_content, index_word.offset)
+            substring_sentence = func(user_input, index, clean_row_content, index_word.offset)
             if substring_sentence != '':
                 score = get_score(user_input, substring_sentence)
                 suggests += [(row_content, index_word.file, index_word.row, score)]
+    return suggests
+
+
+def find_certain_mistake(user_input: str, data: FileData, first_word: str, first_word_len: int, user_input_len: int,
+                         func, error_type: str):
+    suggests = find_mistaken_suggestions_helper(user_input, data, first_word, first_word_len, user_input_len, func)
+    if first_word_len >= 5:
+        suggests += match_first_word_mistaken(user_input.split(' '), data, error_type)
     return suggests
 
 
@@ -192,18 +203,17 @@ def find_mistaken_suggestions(user_input: str, data: FileData, first_word: str, 
     :param num_of_found_suggestions: An integer representing the number of found suggestions.
     :return: A list of suggestions as tuples.
     """
-    suggests = list()
     first_word_len = len(first_word)
     user_input_len = len(user_input)
-    suggests += find_mistaken_suggestions_helper(user_input, data, first_word, first_word_len, user_input_len, add_char)
+
+    suggests = find_certain_mistake(user_input, data, first_word, first_word_len, user_input_len, add_char, 'add')
     num_of_found_suggestions += len(suggests)
     if num_of_found_suggestions < 5:
-        suggests += find_mistaken_suggestions_helper(user_input, data, first_word, first_word_len, user_input_len,
-                                                     replaced_char)
+        suggests += find_certain_mistake(user_input, data, first_word, first_word_len, user_input_len, replaced_char,
+                                         'replace')
     num_of_found_suggestions += len(suggests)
     if num_of_found_suggestions < 5:
-        suggests += find_mistaken_suggestions_helper(user_input, data, first_word, first_word_len, user_input_len,
-                                                     sub_char)
+        suggests += find_certain_mistake(user_input, data, first_word, first_word_len, user_input_len, sub_char, 'sub')
     return remove_duplicates(suggests)
 
 
@@ -216,13 +226,28 @@ def remove_duplicates(suggestions: list) -> list:
     """
     tuple_suggestions = [tuple(suggestion) for suggestion in suggestions]
     set_suggestions = list(set(tuple_suggestions))
-    return [list(suggestion) for suggestion in suggestions]
+    return [list(suggestion) for suggestion in set_suggestions]
 
 
-def match_first_word_mistaken(user_input: List[str], data: FileData) -> list:
+def match_first_word_mistaken_helper(user_input: List[str], user_str: str, data, error_type: str) -> list:
+    alternatives: Set[str] = find_alternative_words(user_input[0], error_type)
+    suggestions = list()
+
+    for alternative in alternatives:
+        alternative_input = ' '.join([alternative] + user_input[1:])
+        new_suggestions = find_match(alternative_input, data, alternative.split(' ')[0])
+        if new_suggestions:
+            [suggestion.append(get_score(user_str, alternative_input)) for suggestion in new_suggestions]
+        suggestions += new_suggestions
+    return suggestions
+
+
+def match_first_word_mistaken(user_input: List[str], data: FileData, error_type: str = 'all') -> list:
     """
     Find suggestions for mistaken input by considering alternative first words.
 
+    :param error_type: witch error to check
+    :param num_of_found_suggestions: In order to know to stop by five
     :param user_input: A list of strings representing the user's input.
     :param data: A FileData object containing data for suggestions.
     :return: A list of suggestions as tuples.
@@ -232,14 +257,14 @@ def match_first_word_mistaken(user_input: List[str], data: FileData) -> list:
 
     user_str = ' '.join(user_input)
     suggestions: list = []
-    alternatives: Set[str] = find_alternative_words(user_input[0])
-
-    for alternative in alternatives:
-        alternative_input = ' '.join([alternative] + user_input[1:])
-        new_suggestions = find_match(alternative_input, data, alternative.split(' ')[0])
-        if new_suggestions:
-            [suggestion.append(get_score(user_str, alternative_input)) for suggestion in new_suggestions]
-        suggestions += new_suggestions
+    if error_type == 'all':
+        suggestions += match_first_word_mistaken_helper(user_input, user_str, data, 'add')
+        if len(suggestions) < 5:
+            suggestions += match_first_word_mistaken_helper(user_input, user_str, data, 'replace')
+        if len(suggestions) < 5:
+            suggestions += match_first_word_mistaken_helper(user_input, user_str, data, 'sub')
+    else:
+        suggestions += match_first_word_mistaken_helper(user_input, user_str, data, error_type)
 
     return remove_duplicates(suggestions)
 
@@ -274,20 +299,21 @@ def find_top_five_completions(user_input: List[str], data: FileData) -> List[Tup
         if len(suggestions) < 5:
             new_suggestions = find_mistaken_suggestions(str_input, data, first_word, len(suggestions))
             suggestions += new_suggestions
-        if len(suggestions) < 5:
+        if len(suggestions) < 5 and len(user_input[0]) < 5:
             new_suggestions = match_first_word_mistaken(user_input, data)
             suggestions += new_suggestions
     else:
         suggestions += match_first_word_mistaken(user_input, data)
     sorted_suggestions = sort_and_filter_first_k(suggestions, 5)
     [suggestion.pop(3) for suggestion in sorted_suggestions]
-    return sorted_suggestions
+    return remove_duplicates(sorted_suggestions)
 
 
-def find_alternative_words(word: str) -> Set[str]:
+def find_alternative_words(word: str, error_type: str) -> Set[str]:
     """
     Generate alternative words by inserting, removing or replacing a space or a letter within a word.
 
+    :param error_type: witch error to check
     :param word: A string representing the word for which alternative words are generated.
     :return: A set of alternative words.
     """
@@ -298,8 +324,13 @@ def find_alternative_words(word: str) -> Set[str]:
 
     for index in range(len(word) + 1):
         for letter in alphabet:
-            alternatives.add(word[:index] + letter + word[index:])
-            alternatives.add(word[:index] + letter + word[index + 1:])
-            alternatives.add(word[:index] + word[index + 1:])
+            if error_type == 'add':
+                alternatives.add(word[:index] + letter + word[index:])
+            elif error_type == 'replace':
+                alternatives.add(word[:index] + letter + word[index + 1:])
+            elif error_type == 'sub':
+                alternatives.add(word[:index] + word[index + 1:])
+            else:
+                raise Exception('No such option')
 
     return alternatives - {word, ''}

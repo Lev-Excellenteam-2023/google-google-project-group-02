@@ -1,11 +1,9 @@
 import os
-import re
 from typing import List
 from util.consts import FILE_CONTENT
 
 from util.remove_punctuation_util import process_sentence
 from data_structure.data_structure import WordData, WordsGraph
-
 
 class FileData:
     """
@@ -17,6 +15,7 @@ class FileData:
     data_dict: dict
     words_graph: WordsGraph
     free_index: int
+
 
     def __init__(self, path):
         self.data_dict = dict()

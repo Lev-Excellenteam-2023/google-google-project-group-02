@@ -1,4 +1,4 @@
-from data_class.file_data import FileData
+from data_structure.file_data import FileData
 from suggest_engine.suggest import find_match, replaced_char, add_char, sub_char, \
     sort_and_filter_first_k, get_score, find_mistaken_suggestions
 
@@ -6,7 +6,7 @@ data = FileData('..\\private\\my_files')
 
 
 def test_find_match():
-    result_list_1 = find_match(['in', 'thi'], data)
+    result_list_1 = find_match('in thi', data, 'in')
     assert result_list_1 == [(0, 2)]
     result_list_2 = find_match(['in', 'tji'], data)
     assert result_list_2 == []

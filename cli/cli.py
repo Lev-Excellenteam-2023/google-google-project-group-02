@@ -5,17 +5,13 @@ from os import environ, path
 from util.consts import CLI_WELCOME_MESSAGE, INPUT_MESSAGE, ROW_CONTENT, FILE_NUMBER, ROW_NUMBER, FILE_NAME,\
     RESET_SYMBOL, BOOT_MESSAGE
 from util.remove_punctuation_util import process_sentence
-from data_class.file_data import FileData
+from data_structure.file_data import FileData
 from suggest_engine.suggest import find_top_five_completions
 from data_structure.auto_complete_data import AutoCompleteData
 from typing import List
 from time import time
 
 
-# todo -  waiting for integration with completion engin
-# from suggest_engine.suggest import find_top_five_completions
-
-# todo -  waiting for integration with completion engin
 def get_best_k_completions(prefix: str, data_cache: FileData) -> List[AutoCompleteData]:
     """
     return five best suggestions matching a user input.
