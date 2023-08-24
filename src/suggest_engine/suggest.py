@@ -200,7 +200,8 @@ def find_certain_mistake(user_input: str, data: FilesData, first_word: str, firs
 
     :return: A list of suggested corrections or fixes for the detected mistakes.
     """
-    suggests: List[List] = find_mistaken_suggestions_helper(user_input, data, first_word, first_word_len, user_input_len, func)
+    suggests: List[List] = find_mistaken_suggestions_helper(user_input, data, first_word, first_word_len,
+                                                            user_input_len, func)
     if first_word_len >= MAX_SUGGESTION:
         suggests += match_first_word_mistaken(user_input.split(' '), data, error_type)
     return suggests
@@ -220,7 +221,8 @@ def find_mistaken_suggestions(user_input: str, data: FilesData, first_word: str,
     first_word_len: int = len(first_word)
     user_input_len: int = len(user_input)
 
-    suggests: List[List] = find_certain_mistake(user_input, data, first_word, first_word_len, user_input_len, add_char, 'add')
+    suggests: List[List] = find_certain_mistake(user_input, data, first_word, first_word_len, user_input_len, add_char,
+                                                'add')
     num_of_found_suggestions += len(suggests)
     if num_of_found_suggestions < MAX_SUGGESTION:
         suggests += find_certain_mistake(user_input, data, first_word, first_word_len, user_input_len, replaced_char,
@@ -243,10 +245,12 @@ def remove_duplicates(suggestions: List[List]) -> List[List]:
     return [list(suggestion) for suggestion in set_suggestions]
 
 
-def match_first_word_mistaken_helper(user_input: List[str], user_str: str, data, error_type: str) -> List[List]:
+def match_first_word_mistaken_helper(user_input: List[str], user_str: str, data, error_type: str,
+                                     first_word_completed: bool = True) -> List[List]:
     """
     Generate suggestions based on alternative words for the first word in user input.
 
+    :param first_word_completed: A flag to know if the input has at least one white space.
     :param user_input: A list of words in the user's input.
     :param user_str: The original user input string.
     :param data: The data or dataset used for generating suggestions.
@@ -259,9 +263,15 @@ def match_first_word_mistaken_helper(user_input: List[str], user_str: str, data,
 
     for alternative in alternatives:
         alternative_input: str = ' '.join([alternative] + user_input[1:])
-        new_suggestions: List[List] = find_match(alternative_input, data, alternative.split(' ')[0])
-        if new_suggestions:
+        if first_word_completed:
+            new_suggestions: List[List] = find_match(alternative_input, data, alternative.split(' ')[0])
+            if new_suggestions:
+                [suggestion.append(get_score(user_str, alternative_input)) for suggestion in new_suggestions]
+        elif len(alternative.split(' ')) > 1:
+            new_suggestions: List[List] = find_match(alternative, data, alternative.split(' ')[0])
             [suggestion.append(get_score(user_str, alternative_input)) for suggestion in new_suggestions]
+        else:
+            new_suggestions: List[List] = first_word_complete(data, alternative)
         suggestions += new_suggestions
     return suggestions
 
@@ -305,38 +315,91 @@ def sort_and_filter_first_k(suggestions: List[List], k: int) -> List[List]:
     return suggestions[:k]
 
 
+def first_word_complete(data: FilesData, str_input: str):
+    """
+    Find word completion suggestions for the first word in a user input string.
+
+    :param data: The data source for suggestions.
+    :param str_input: The user input string.
+
+    :return: A list of lists containing word completion suggestions.
+    """
+    suggestions: List[List] = list()
+    filtered_keys: List[str] = [key for key in data.words_graph.graph if key.startswith(str_input)]
+    for key in filtered_keys:
+        suggestions += find_match(str_input, data, key)
+    [suggestion.append(len(str_input) * 2) for suggestion in suggestions]
+    return suggestions
+
+
+def first_word_mistaken(data: FilesData, user_input: List[str], str_input: str):
+    """
+    Generate word completion suggestions for a mistaken first word in user input.
+
+    :param data: The data source for suggestions.
+    :param user_input: A list of user input words.
+    :param str_input: The user input string.
+
+    :return: A list of lists containing word completion suggestions.
+    """
+    suggestions: List[List] = first_word_complete(data, str_input)
+    if len(suggestions) < MAX_SUGGESTION:
+        suggestions += match_first_word_mistaken_helper(user_input, str_input, data, 'add', False)
+        suggestions = remove_duplicates(suggestions)
+    if len(suggestions) < MAX_SUGGESTION:
+        suggestions += match_first_word_mistaken_helper(user_input, str_input, data, 'replace', False)
+        suggestions = remove_duplicates(suggestions)
+    if len(suggestions) < MAX_SUGGESTION:
+        suggestions += match_first_word_mistaken_helper(user_input, str_input, data, 'sub', False)
+    return remove_duplicates(suggestions)
+
+
+def multiple_words_handle(user_input: List[str], str_input: str, first_word: str, data: FilesData):
+    """
+    Handle scenarios with multiple words in user input, generating suggestions for the first word.
+
+    :param user_input: A list of user input words.
+    :param str_input: The user input string.
+    :param first_word: The first word from user input.
+    :param data: The data source for suggestions.
+
+    :return: A list of lists containing word completion suggestions.
+    """
+    suggestions: List[List] = list()
+    if first_word in data.words_graph.graph:
+        suggestions += find_match(str_input, data, first_word)
+        [suggestion.append(len(str_input) * 2) for suggestion in suggestions]
+        if len(suggestions) < MAX_SUGGESTION:
+            new_suggestions: List[List] = find_mistaken_suggestions(str_input, data, first_word, len(suggestions))
+            suggestions += new_suggestions
+            x = len(suggestions)
+            y = len(user_input[0])
+        if len(suggestions) < MAX_SUGGESTION and len(user_input[0]) < MAX_SUGGESTION:
+            new_suggestions: List[List] = match_first_word_mistaken(user_input, data)
+            suggestions += new_suggestions
+    else:
+        suggestions += match_first_word_mistaken(user_input, data)
+    return suggestions
+
+
 def find_top_five_completions(user_input: List[str], data: FilesData, ends_with_white_space: bool) -> List[List]:
     """
-    Find the top five completions for the user's input based on data.
+    Find the top five word completions for a given user input.
 
-    :param ends_with_white_space: bool if the input ands with a white space.
-    :param user_input: A list of strings representing the user's input.
-    :param data: A FileData object containing data for suggestions.
-    :return: A list of tuples representing the top five completions.
+    :param user_input: A list of words entered by the user.
+    :param data: The data source for suggestions.
+    :param ends_with_white_space: A flag indicating if the user input ends with a white space.
+
+    :return: A list of lists containing word completion suggestions.
     """
 
     first_word: str = user_input[0]
     suggestions: List[List] = list()
     str_input: str = ' '.join(user_input)
     if len(user_input) == 1 and not ends_with_white_space:
-        filtered_keys: List[str] = [key for key in data.words_graph.graph if key.startswith(str_input)]
-        for key in filtered_keys:
-            suggestions += find_match(str_input, data, key)
-        [suggestion.append(len(str_input) * 2) for suggestion in suggestions]
-        if len(suggestions) < MAX_SUGGESTION:
-            suggestions += match_first_word_mistaken(user_input, data)
+        suggestions += first_word_mistaken(data, user_input, str_input)
     else:
-        if first_word in data.words_graph.graph:
-            suggestions += find_match(str_input, data, first_word)
-            [suggestion.append(len(str_input) * 2) for suggestion in suggestions]
-            if len(suggestions) < MAX_SUGGESTION:
-                new_suggestions: List[List] = find_mistaken_suggestions(str_input, data, first_word, len(suggestions))
-                suggestions += new_suggestions
-            if len(suggestions) < MAX_SUGGESTION and len(user_input[0]) < MAX_SUGGESTION:
-                new_suggestions: List[List] = match_first_word_mistaken(user_input, data)
-                suggestions += new_suggestions
-        else:
-            suggestions += match_first_word_mistaken(user_input, data)
+        suggestions += multiple_words_handle(user_input, str_input, first_word, data)
     sorted_suggestions: List[List] = sort_and_filter_first_k(suggestions, MAX_SUGGESTION)
     [suggestion.pop(3) for suggestion in sorted_suggestions]
     return remove_duplicates(sorted_suggestions)
