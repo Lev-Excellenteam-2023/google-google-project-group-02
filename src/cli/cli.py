@@ -2,7 +2,7 @@ import datetime
 import logging
 import os
 from os import environ, path
-from src.util.consts import CLI_WELCOME_MESSAGE, INPUT_MESSAGE, ROW_CONTENT, FILE_NUMBER, ROW_NUMBER, FILE_NAME,\
+from src.util.consts import CLI_WELCOME_MESSAGE, INPUT_MESSAGE, ROW_CONTENT, FILE_NUMBER, ROW_NUMBER, FILE_NAME, \
     RESET_SYMBOL, BOOT_MESSAGE
 from src.util.remove_punctuation_util import process_sentence
 from src.data_structures.files_data import FilesData
@@ -20,7 +20,8 @@ def get_best_k_completions(prefix: str, data_cache: FilesData) -> List[AutoCompl
     :return: list of five AutoCompleteData objects, each containing a suggestion line and metadata about it.
     """
     processed_prefix: List[str] = process_sentence(prefix)
-    suggestions_metadata: List[List] = find_top_five_completions(processed_prefix, data_cache, prefix.endswith(' '))
+    suggestions_metadata: List[List] = find_top_five_completions(processed_prefix, data_cache,
+                                                                 prefix.endswith(' ')) if processed_prefix else []
 
     processed_suggestions: List[AutoCompleteData] = []
     for suggestion in suggestions_metadata:
